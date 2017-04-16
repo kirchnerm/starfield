@@ -12,17 +12,19 @@
         width = window.innerWidth - margin.left - margin.right,
         height = window.innerHeight - margin.top - margin.bottom;
         
-    var svg = d3.select("body").style("background-color","black")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+    var svg = d3.select("body")
+                    .style("background-color","black")
+                    .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                      .append("g")
+                        .attr("transform",
+                              "translate(" + margin.left + "," + margin.top + ")");
 
     let x = d3.scaleLinear().range([0,width]).domain([0,100]);
-    let y = d3.scaleLinear().range([height,0]).domain([0,100]);
+    let y = d3.scaleLinear().range([height,0]).domain([0,100]);          
 
+    // draw a single star
     let draw = (star) => {
         svg.append("circle")
             .attr("cx", width + 10 )
@@ -37,6 +39,7 @@
                             .remove()
     }
 
+    // generate a random star
     let getStar = () => {
         return {
             y: getRandom(0,100),
@@ -48,10 +51,30 @@
     
     let getRandom = (min, max) => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }   
+    }
     
+    // load and launch rocket
+    d3.xml("rocket-ship.svg").mimeType("image/svg+xml").get(function(error, xml) {
+        if (error) throw error;
+        var svgNode = xml.getElementsByTagName("svg")[0];
+        svg.node().appendChild(svgNode);
+        
+        let rocketFly = () => {
+            d3.select(".rocket")
+                        .transition()
+                            .duration(8000)
+                                .attr("x", Math.floor(x(getRandom(20,70))))
+                                .attr("y", Math.floor(y(getRandom(20,70))))
+                                .on("end", function() { rocketFly(); } )            
+        }
+        
+        rocketFly();
+    });
+
+    // draw infinite stars
     d3.interval(function() {
         draw(getStar());            
-    }, 200);
+    }, 100);
+    
 </script>
 </html>
